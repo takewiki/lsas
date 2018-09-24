@@ -1,11 +1,31 @@
+use  AIS20160422080603
+go
 
-select u.fname as 用户名, case when e.fnumber is null then '' else e.fnumber end  as 员工代码,
-case when e.fname  is null then '' else e.fname end as 员工姓名,
-case when r.FSubSys is null then '' else r.FSubSys end   as 功能模块,
-case when r.FItemName  is null then '' else r.FItemName end   as 职责,
-case FForbidden when 0 then '正常' else '禁用' end   as 状态,
-convert(varchar(10),fcreatetime,120) 用户启用日期 ,
-convert(varchar(10),last_log_date,120) 用户最终登录日期
+
+select u.fname as 'Kingdee user name', 
+case when e.fnumber is null then '' else e.fnumber end  as 'Employee ID',
+case when e.fname  is null then '' else e.fname end as 'Employee Name',
+case r.FSubSys when '基础资料' then 'Master Data'
+               when '总账' then 'General Ledger'
+               when '固定资产' then 'Fixed Assets'
+               when  '报表' then 'Report'
+               when  '现金管理' then 'Cash'
+               when  '现金流量表' then 'Cash Flow Statement'
+               when  '工资' then 'Payroll'
+               when '应收账' then 'A/R'
+               when '应付账' then 'A/P'
+               when '采购管理系统' then 'Purchase'
+               when '仓存管理系统' then 'Inventory'
+               when '存货核算管理系统' then 'Inventory Accounting'
+               when '销售管理系统' then 'Sales'
+               when '费用预算' then 'Expense Budget'
+               when '费用管理' then 'Expense Management'
+               when '供应商管理' then 'SRM'
+               when '日志管理' then 'Log Management'  else '' end   as 'Kingdee Function',
+case r.FItemName when '查看' then 'Read Only' when '新增' then 'Input' when '审核' then 'Approval'  else '' end   as 'Role',
+case FForbidden when 0 then 'Active' else 'Inactive' end   as 'Current Status',
+convert(varchar(10),fcreatetime,120) as 'Date of Access Granted' ,
+convert(varchar(10),last_log_date,120)  as 'Date of last log-in'
 
 
  from t_user  u
