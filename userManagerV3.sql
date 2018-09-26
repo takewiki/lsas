@@ -1,6 +1,9 @@
 ----版本更新说明
 ----V2:
 ---- 解决金蝶版本兼容性问题，使用首次登录日期取代用户创建日期
+----V3：
+-----解决用户列表偏少的问题
+----最新版本
 
 set nocount on
 
@@ -17,13 +20,13 @@ select * from
   
   
   from t_user  u
-  inner join 
+  left  join   ---解决用户创建后没有登录问题
   (select FUserID,min(fdate) as FirstLoginDate,MAX(FDate) as last_log_date from t_Log  
     group by FUserID) data1
   on u.FUserID=data1.FUserID
-  left join t_Emp e
+  left join t_Emp e  --- 解决用户没有关联职员问题
   on  u.FEmpID=e.FItemID
-  left join
+  left join    ----解决用户没有进行权限授权问题
   (select distinct 
     w2.FSubSys as FSubSys,
     --- w.FGroupid,
