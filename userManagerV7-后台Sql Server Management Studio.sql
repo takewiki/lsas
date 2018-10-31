@@ -1,5 +1,9 @@
 go
-alter view takewiki_kingdee_list as 
+IF EXISTS(SELECT 1 FROM sys.views WHERE name='takewiki_kingdee_list')
+DROP VIEW takewiki_kingdee_list
+GO
+create view takewiki_kingdee_list as 
+----创建视图，所有金蝶用户的权限表
 select distinct w2.FSubSys as FSubSys,w.FGroupid,t3.FObjecttype,
 t3.FObjectID,t4.FIndex,t3.FTypeName,t4.FName as FItemName,
 t4.FDescription as FDescription,t3.FUserName ,t3.FUserID
@@ -146,7 +150,12 @@ from t_AccessControl a,t_ObjectType o where a.fObjectType=o.FObjectType and a.FO
   
   ---table2
   go
- alter view  takewiki_user_loginDate as 
+  IF EXISTS(SELECT 1 FROM sys.views WHERE name='takewiki_user_loginDate')
+DROP VIEW takewiki_user_loginDate
+GO
+create  view  takewiki_user_loginDate as 
+----创建视图，所有用户的开始启用日期与最终登录日期，
+----以t_log表进行查询判断
   select FUserID,isnull(convert(varchar(10),MIN(FDate),120),'') as FStartDate,
                  isnull(convert(varchar(10),MAX(fdate),120),'') as FLastLoginDate from t_Log
   group by FUserID
@@ -155,7 +164,12 @@ from t_AccessControl a,t_ObjectType o where a.fObjectType=o.FObjectType and a.FO
   ----select * from takewiki_user_loginDate
   ---
   go
-  alter view takewiki_user_emp as 
+
+IF EXISTS(SELECT 1 FROM sys.views WHERE name='takewiki_user_emp')
+DROP VIEW takewiki_user_emp
+GO
+create view takewiki_user_emp as 
+---创建视图，所有用户与职员的对应表
   select u.FUserID,ISNULL(e.FNumber,'')  as FEmpNumber,
   ISNULL(e.FName,'') as FEmpName,
   FForbidden as FStatus  from t_user u 
@@ -163,7 +177,11 @@ from t_AccessControl a,t_ObjectType o where a.fObjectType=o.FObjectType and a.FO
   on u.FEmpID=e.FItemID
   
   go
-alter  view takewiki_kingdeeUserList as
+IF EXISTS(SELECT 1 FROM sys.views WHERE name='takewiki_kingdeeUserList')
+DROP VIEW takewiki_kingdeeUserList
+GO  
+create view takewiki_kingdeeUserList as
+---创建视图，将上述3个视图进行合并，并处理转交易供应商为审核
   select distinct a.FSubSys,a.FTypeName ,
   case  a.FItemName when '转交易供应商' then '审核' else a.FItemName  end  as FItemName , a.FUserName,b.FEmpName,b.FEmpNumber,c.FStartDate,c.FLastLoginDate,b.FStatus  from  takewiki_kingdee_list a
   inner join takewiki_user_emp b 
@@ -174,17 +192,5 @@ alter  view takewiki_kingdeeUserList as
   
  go
  
- select FUserName   as  用户名  ,
-        FEmpNumber  as   员工代码 ,
-        FEmpName    as   员工姓名,
-        FSubSys     as  模块,
-        FTypeName   as  功能,
-        FItemName   as  职责,
-        case fstatus when 0 then '正常' else '禁用' end as  状态,
-        FStartDate as 启用日期,
-        FLastLoginDate as 最近登陆日期
-        
-  from takewiki_kingdeeUserList
- order by FUserName,FSubSys,FTypeName,FItemName
- 
+
     
